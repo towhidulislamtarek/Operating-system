@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+int main() {
+    int num, reversed = 0, remainder;
+
+    printf("Enter a number: ");
+    scanf("%d", &num);
+
+    while(num != 0) {
+        remainder = num % 10;        // শেষ digit বের করা
+        reversed = reversed * 10 + remainder; // reversed number update করা
+        num = num / 10;              // শেষ digit বাদ দেওয়া
+    }
+
+    printf("Reversed Number: %d", reversed);
+
+    return 0;
+}
