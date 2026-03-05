@@ -1,0 +1,20 @@
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+    char str[200];
+    int i, words = 1;  // প্রথম শব্দ ধরে নিয়ে শুরু
+
+    printf("Enter a string: ");
+    fgets(str, sizeof(str), stdin); // space সহ string নেওয়ার জন্য fgets
+
+    for(i = 0; str[i] != '\0'; i++) {
+        if(str[i] == ' ' && str[i+1] != ' ' && str[i+1] != '\n') {
+            words++;
+        }
+    }
+
+    printf("Number of words: %d", words);
+
+    return 0;
+}
