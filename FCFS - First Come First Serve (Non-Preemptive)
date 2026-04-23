@@ -1,0 +1,85 @@
+#include <stdio.h>
+#define MAX 100
+
+int main() {
+    int n;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[MAX], bt[MAX];
+    int ct[MAX], tat[MAX], wt[MAX], rt[MAX];
+    int order[MAX]; // sorted order by arrival time
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter AT and BT for P%d: ", i + 1);
+        scanf("%d %d", &at[i], &bt[i]);
+        order[i] = i;
+    }
+
+    // Sort by arrival time (bubble sort)
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (at[order[j]] > at[order[j + 1]]) {
+                int tmp = order[j];
+                order[j] = order[j + 1];
+                order[j + 1] = tmp;
+            }
+        }
+    }
+
+    // Gantt chart: -1 means IDLE
+    int gantt_p[10000], gantt_time[10001];
+    int g = 0;
+
+    int time = 0;
+
+    for (int k = 0; k < n; k++) {
+        int i = order[k];
+
+        // CPU IDLE if next process hasn't arrived yet
+        if (time < at[i]) {
+            gantt_p[g] = -1;
+            gantt_time[g] = time;
+            g++;
+            time = at[i];
+        }
+
+        // Response time = waiting time for non-preemptive
+        rt[i] = time - at[i];
+
+        // Gantt entry
+        gantt_p[g] = i;
+        gantt_time[g] = time;
+        g++;
+
+        time += bt[i];
+        ct[i] = time;
+        tat[i] = ct[i] - at[i];
+        wt[i] = tat[i] - bt[i];
+    }
+    gantt_time[g] = time;
+
+    // Print Table
+    printf("\nProcess\tAT\tBT\tCT\tTAT\tWT\tRT\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               i + 1, at[i], bt[i], ct[i], tat[i], wt[i], rt[i]);
+    }
+
+    // Gantt Chart
+    printf("\nGantt Chart:\n");
+    for (int i = 0; i < g; i++) {
+        if (gantt_p[i] == -1)
+            printf("| IDLE ");
+        else
+            printf("| P%d  ", gantt_p[i] + 1);
+    }
+    printf("|\n");
+    printf("%d", gantt_time[0]);
+    for (int i = 1; i <= g; i++) {
+        printf("     %d", gantt_time[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
