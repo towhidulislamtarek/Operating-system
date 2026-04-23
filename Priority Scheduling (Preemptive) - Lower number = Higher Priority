@@ -1,0 +1,102 @@
+#include <stdio.h>
+#define MAX 100
+
+int main() {
+    int n;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[MAX], bt[MAX], pr[MAX], rem_bt[MAX];
+    int ct[MAX], tat[MAX], wt[MAX], rt[MAX];
+
+    for (int i = 0; i < n; i++) {
+        printf("Enter AT, BT and Priority for P%d: ", i + 1);
+        scanf("%d %d %d", &at[i], &bt[i], &pr[i]);
+        rem_bt[i] = bt[i];
+        rt[i] = -1;
+    }
+
+    int time = 0, completed = 0;
+
+    // Gantt chart: -1 means IDLE
+    int gantt_p[10000], gantt_time[10001];
+    int g = 0;
+
+    while (completed < n) {
+        int highest = -1;
+        int best_pr = 100000;
+
+        for (int i = 0; i < n; i++) {
+            if (at[i] <= time && rem_bt[i] > 0) {
+                if (pr[i] < best_pr) {
+                    best_pr = pr[i];
+                    highest = i;
+                }
+            }
+        }
+
+        if (highest == -1) {
+            // CPU is IDLE — record in Gantt (avoid duplicate idle entries)
+            if (g == 0 || gantt_p[g - 1] != -1) {
+                gantt_p[g] = -1;
+                gantt_time[g] = time;
+                g++;
+            }
+            time++;
+            continue;
+        }
+
+        // Response time
+        if (rt[highest] == -1) {
+            rt[highest] = time - at[highest];
+        }
+
+        // Gantt entry (avoid duplicate consecutive entries for same process)
+        if (g == 0 || gantt_p[g - 1] != highest) {
+            gantt_p[g] = highest;
+            gantt_time[g] = time;
+            g++;
+        }
+
+        rem_bt[highest]--;
+        time++;
+
+        if (rem_bt[highest] == 0) {
+            ct[highest] = time;
+            completed++;
+        }
+    }
+
+    // Store final time
+    gantt_time[g] = time;
+
+    // Calculate TAT & WT
+    for (int i = 0; i < n; i++) {
+        tat[i] = ct[i] - at[i];
+        wt[i] = tat[i] - bt[i];
+    }
+
+    // Print Table
+    printf("\nProcess\tAT\tBT\tPR\tCT\tTAT\tWT\tRT\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               i + 1, at[i], bt[i], pr[i], ct[i], tat[i], wt[i], rt[i]);
+    }
+
+    // Gantt Chart
+    printf("\nGantt Chart:\n");
+    for (int i = 0; i < g; i++) {
+        if (gantt_p[i] == -1)
+            printf("| IDLE ");
+        else
+            printf("| P%d  ", gantt_p[i] + 1);
+    }
+    printf("|\n");
+    printf("%d", gantt_time[0]);
+    for (int i = 1; i <= g; i++) {
+        printf("     %d", gantt_time[i]);
+    }
+    printf("\n");
+
+    return 0;
+}
