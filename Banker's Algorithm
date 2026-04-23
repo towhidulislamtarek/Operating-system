@@ -1,0 +1,55 @@
+
+#include <stdio.h>
+#define MAX 10
+int main() {
+ int n, r;
+ printf("Enter number of processes and resources: ");
+ scanf("%d %d", &n, &r);
+ int alloc[MAX][MAX], max[MAX][MAX], need[MAX][MAX];
+ int avail[MAX], seq[MAX], serviced[MAX];
+ printf("Enter Allocation Matrix:\n");
+ for (int i = 0; i < n; i++) {
+ printf("P%d: ", i + 1);
+ for (int j = 0; j < r; j++) { scanf("%d", &alloc[i][j]); }
+ }
+ printf("Enter Max Matrix:\n");
+ for (int i = 0; i < n; i++) {
+ printf("P%d: ", i + 1);
+ for (int j = 0; j < r; j++) { scanf("%d", &max[i][j]); }
+ }
+ printf("Enter Available: ");
+ for (int j = 0; j < r; j++) { scanf("%d", &avail[j]); }
+ // Need = Max - Alloc
+ for (int i = 0; i < n; i++) {
+ for (int j = 0; j < r; j++) { need[i][j] = max[i][j] - alloc[i][j]; }
+ }
+ printf("\nNeed Matrix:\n");
+ for (int i = 0; i < n; i++) {
+ printf("P%d: ", i + 1);
+ for (int j = 0; j < r; j++) { printf("%d ", need[i][j]); }
+ printf("\n");
+ }
+ // Safety Algorithm
+ for (int i = 0; i < n; i++) { serviced[i] = 0; }
+ int cnt = 0;
+ for (int i = 0; i < n; i++) {
+ if (serviced[i] == 1) { continue; }
+ int k = 0;
+ for (int j = 0; j < r; j++) {
+ if (need[i][j] > avail[j]) { k = 1; break; }
+ }
+ if (k == 0) {
+ for (int j = 0; j < r; j++) { avail[j] += alloc[i][j]; }
+ serviced[i] = 1;
+ seq[cnt++] = i;
+ i = -1;
+ }
+ }
+ if (cnt == n) {
+ printf("\nSAFE STATE.\nSafe Sequence: ");
+ for (int i = 0; i < n; i++) { printf("P%d%s", seq[i]+1, i<n-1?" -> ":"\n"); }
+ } else {
+ printf("\nUNSAFE STATE. Deadlock possible.\n");
+ }
+ return 0;
+}
